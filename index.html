@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" 
+      href="https://cdn.jsdelivr.net/gh/spiermar/d3-flame-graph@1.0.4/dist/d3.flameGraph.min.css" 
+      integrity="sha256-w762vSe6WGrkVZ7gEOpnn2Y+FSmAGlX77jYj7nhuCyY=" 
+      crossorigin="anonymous" 
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div id="text" style="width: 600px">
+        loading... https://news.ycombinator.com/item?id=25706993
+      </div>
+      <div id="chart">
+      </div>
+      <hr/>
+      <div style="display: none" id="pullother">
+        <p>
+        pull another thread:
+        </p>
+        <p>
+        thread ID: <input type="text" id="threadid" /> <button onClick="pullOtherThread()">Pull</button>
+        </p>
+      </div>
+    </div>
+
+    <script type="text/javascript" 
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.0/d3.min.js" 
+      integrity="sha256-r7j1FXNTvPzHR41+V71Jvej6fIq4v4Kzu5ee7J/RitM=" 
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" 
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js" 
+      integrity="sha256-z0A2CQF8xxCKuOJsn4sJ5HBjxiHHRAfTX8hDF4RSN5s=" 
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" 
+      src="https://cdn.jsdelivr.net/gh/spiermar/d3-flame-graph@1.0.4/dist/d3.flameGraph.min.js" 
+      integrity="sha256-I1CkrWbmjv+GWjgbulJ4i0vbzdrDGfxqdye2qNlhG3Q=" 
+      crossorigin="anonymous">
+    </script>
+
+    <script src="code.js"></script>
+    <script type="text/javascript">
+    var flameGraph = d3.flameGraph()
+      .width(960)
+      .cellHeight(18)
+      .transitionDuration(750)
+      .transitionEase(d3.easeCubic)
+      .sort(true)
+      //Example to sort in reverse order
+      //.sort(function(a,b){ return d3.descending(a.data.name, b.data.name);})
+      .title("");
+
+    // Example on how to use custom tooltips using d3-tip.
+    var tip = d3.tip()
+      .direction("s")
+      .offset([8, 0])
+      .attr('class', 'd3-flame-graph-tip')
+      .html(function(d) { return "name: " + d.data.name + ", value: " + d.data.value; });
+
+    flameGraph.tooltip(tip);
+
+    // Example on how to use custom labels
+    // var label = function(d) {
+    //  return "name: " + d.data.name + ", value: " + d.data.value;
+    // }
+
+    // flameGraph.label(label);
+
+    if (location.hash) {
+      loadThread(location.hash.replace('#', ''))
+
+    } else {
+    d3.json("data.json", function(error, data) {
+      if (error) return console.warn(error);
+      d3.select("#chart")
+          .datum(data)
+          .call(flameGraph);
+      pullother.style.display = 'block';
+      text.innerText = "click an item in the graph to view comment. You are viewing https://news.ycombinator.com/item?id=25706993"
+
+      flameGraph.onClick(loadComments);
+    });
+    }
+
+    function loadComments(d) {
+        var node = d;
+        var conv = []
+        do {
+          conv.push(node.data)
+          node = node.parent
+        } while (node)
+
+        conv.reverse()
+
+        text.innerHTML = conv.map(_ => `<p><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b><br/>${_.text}</p>`).join('');
+
+      }
+
+    function pullOtherThread() {
+      loadThread(threadid.value)
+    }
+
+
+    async function loadThread(id) {
+      text.innerText = "pulling comments (via HN API) from your browser... long threads may take a long long time! (check Network tab in dev tool). Check /code-server.js to see how to pull comments from server-side"
+      const data = await start(id);
+      d3.select("#chart")
+          .datum(data)
+          .call(flameGraph);
+
+      flameGraph.onClick(loadComments);
+      text.innerText = "click an item in the graph to view comment"
+      pullother.style.display = 'block';
+    }
+    </script>
+    <small>I also built a macOS app for devs, check it out 😊 <a href="https://devutils.app">https://devutils.app</a></small>
+  </body>
+</html>
