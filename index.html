@@ -20,7 +20,14 @@
       color: gray;
     }
     .d3-flame-graph-tip {
+      max-width: 500px;
+    }
+    .d3-flame-graph-tip a {
       color: white !important;
+    }
+    #chart svg {
+      display: block;
+      margin: 0 auto;
     }
     </style>
   </head>
@@ -69,13 +76,13 @@
       .title("");
 
     // Example on how to use custom tooltips using d3-tip.
-    var TIP_LENGTH = 200;
+    var TIP_LENGTH = 500;
     var tip = d3.tip()
       .direction("s")
       .offset([8, 0])
       .attr('class', 'd3-flame-graph-tip')
       .html(function(d) {
-        return (d.data.text || '').substring(0, TIP_LENGTH) + ((d.data.text || '').length > TIP_LENGTH ? '...' : '');
+        return '@' + d.data.name + ':<br/><br/>' + (d.data.text || '').substring(0, TIP_LENGTH) + ((d.data.text || '').length > TIP_LENGTH ? '...' : '');
       });
 
     flameGraph.tooltip(tip);
