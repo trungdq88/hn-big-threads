@@ -7,22 +7,36 @@
       integrity="sha256-w762vSe6WGrkVZ7gEOpnn2Y+FSmAGlX77jYj7nhuCyY=" 
       crossorigin="anonymous" 
     />
+
+    <style>
+    .comment {
+      max-width: 600px;
+      padding: 5px;
+    }
+    .highlighted {
+      background: #e6e6e6;
+    }
+    .muted{
+      color: gray;
+    }
+    .d3-flame-graph-tip {
+      color: white !important;
+    }
+    </style>
   </head>
   <body>
     <div class="container">
-      <div id="text" style="width: 600px">
-        loading... https://news.ycombinator.com/item?id=25706993
+      <div>
+        <div style="display: none" id="pullother">
+          <p>
+          Read another thread: <input type="text" placeholder="Thread ID" id="threadid" /> <button onClick="pullOtherThread()">Pull</button>
+          </p>
+        </div>
+        <div id="chart">
+        </div>
       </div>
-      <div id="chart">
-      </div>
-      <hr/>
-      <div style="display: none" id="pullother">
-        <p>
-        pull another thread:
-        </p>
-        <p>
-        thread ID: <input type="text" id="threadid" /> <button onClick="pullOtherThread()">Pull</button>
-        </p>
+      <div id="text">
+        Loading... https://news.ycombinator.com/item?id=25706993
       </div>
     </div>
 
@@ -49,20 +63,22 @@
       .cellHeight(18)
       .transitionDuration(750)
       .transitionEase(d3.easeCubic)
-      .sort(true)
+      .sort(false)
       //Example to sort in reverse order
       //.sort(function(a,b){ return d3.descending(a.data.name, b.data.name);})
       .title("");
 
     // Example on how to use custom tooltips using d3-tip.
+    var TIP_LENGTH = 200;
     var tip = d3.tip()
       .direction("s")
       .offset([8, 0])
       .attr('class', 'd3-flame-graph-tip')
-      .html(function(d) { return "name: " + d.data.name + ", value: " + d.data.value; });
+      .html(function(d) {
+        return (d.data.text || '').substring(0, TIP_LENGTH) + ((d.data.text || '').length > TIP_LENGTH ? '...' : '');
+      });
 
     flameGraph.tooltip(tip);
-
     // Example on how to use custom labels
     // var label = function(d) {
     //  return "name: " + d.data.name + ", value: " + d.data.value;
@@ -88,15 +104,21 @@
 
     function loadComments(d) {
         var node = d;
-        var conv = []
+        var parents = []
         do {
-          conv.push(node.data)
+          parents.push(node.data)
           node = node.parent
         } while (node)
 
-        conv.reverse()
+        parents.reverse()
 
-        text.innerHTML = conv.map(_ => `<p><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b><br/>${_.text}</p>`).join('');
+      var immediateChilds = (d.data.children || [])
+
+      function render(conversation, level = false) {
+        return conversation.map((_, i) => `<div class="comment ${level && i === conversation.length - 1 ? 'highlighted' : ''}" style="${level ? `padding-left: ${30 * i}px;` : ''}"><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b> - <i class="muted">${_.children ? _.children.length : 0} direct childs, ${_.value} total comments </i><br/>${_.text}</div>`).join('');
+      }
+
+      text.innerHTML = render(parents, true) + `<br/><div class="comment" style="padding-left: ${parents.length * 30}px"><p><i class="muted">Direct childs:</i></p>` + render(immediateChilds) + '</div>';
 
       }
 
@@ -106,17 +128,21 @@
 
 
     async function loadThread(id) {
-      text.innerText = "pulling comments (via HN API) from your browser... long threads may take a long long time! (check Network tab in dev tool). Check /code-server.js to see how to pull comments from server-side"
+      text.innerHTML = "Loading... <br/> Pulling comments (via HN API) from your browser... long threads may take a long long time! (check Network tab in dev tool). Check /code-server.js to see how to pull comments from server-side"
       const data = await start(id);
+      console.log(data)
       d3.select("#chart")
           .datum(data)
           .call(flameGraph);
 
       flameGraph.onClick(loadComments);
+
       text.innerText = "click an item in the graph to view comment"
       pullother.style.display = 'block';
     }
     </script>
+
+        <hr/>
     <small>I also built a macOS app for devs, check it out 😊 <a href="https://devutils.app">https://devutils.app</a></small>
   </body>
 </html>
