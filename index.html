@@ -34,10 +34,14 @@
   <body>
     <div class="container">
       <div>
-        <div style="display: none" id="pullother">
+        <div style="display: none;  justify-content: space-between" id="pullother">
           <p>
           Read another thread: <input type="text" placeholder="Thread ID" id="threadid" /> <button onClick="pullOtherThread()">Pull</button>
           </p>
+
+      <p><span>Or use this bookmark: <a href="javascript:location.href='https://trungdq88.github.io/hn-big-threads/#' + location.href.split('item?id=')[1]">Flame It!</a> ⬅ drag this to your bookmark bar, then click it while in a HN post.</span></p>
+
+      <p><span><a href="https://github.com/trungdq88/hn-big-threads">GitHub</a></span></p>
         </div>
         <div id="chart">
         </div>
@@ -104,7 +108,7 @@
       d3.select("#chart")
           .datum(data)
           .call(flameGraph);
-      pullother.style.display = 'block';
+      pullother.style.display = 'flex';
       text.innerText = "click an item in the graph to view comment. You are viewing https://news.ycombinator.com/item?id=25706993"
 
       flameGraph.onClick(loadComments);
@@ -157,11 +161,6 @@
     };
     </script>
 
-    <div style="display: flex; justify-content: space-between">
-      <p><span>Bookmark: <a href="javascript:location.href='https://trungdq88.github.io/hn-big-threads/#' + location.href.split('item?id=')[1]">Flame It!</a> ⬅ drag this to your bookmark bar, then click it while in a HN post.</span></p>
-
-      <p><span><a href="https://github.com/trungdq88/hn-big-threads">GitHub</a></span></p>
-    </div>
 
     <hr/>
     <small>I also built a macOS app for devs, check it out 😊 <a href="https://devutils.app">https://devutils.app</a></small>
