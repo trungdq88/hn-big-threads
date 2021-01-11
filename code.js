@@ -4,15 +4,17 @@ async function get(id) {
   ).then(r => r.json());
 }
 
-async function pull(id) {
-  window.pullCallback && window.pullCallback();
+async function pull(id, descendants) {
+  window.pullCallback && window.pullCallback(descendants);
   const node = await get(id);
 
   const children = [];
   let value = 1;
 
   const pulledKids = await Promise.all(
-    ((node && node.kids) || []).map(k => pull(k))
+    ((node && node.kids) || []).map(k =>
+      pull(k, node.descendants || descendants)
+    )
   );
 
   let data = {};

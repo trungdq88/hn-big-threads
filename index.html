@@ -70,6 +70,7 @@
     <script src="code.js"></script>
     <script type="text/javascript">
     let pullCount = 0
+    let totalComment = 0
 
     var flameGraph = d3.flameGraph()
       .width(960)
@@ -154,10 +155,11 @@
       pullother.style.display = 'block';
     }
 
-    window.pullCallback = () => {
+    window.pullCallback = (descendants) => {
+      totalComment = descendants;
       pullCount++;
       const status = document.getElementById('pull-status');
-      status && (status.innerText = pullCount);
+      status && (status.innerText = `${pullCount}/${totalComment} (${Math.round(100 * pullCount / totalComment)}%)`);
     };
     </script>
 
