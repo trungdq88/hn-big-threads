@@ -5,7 +5,7 @@ async function get(id) {
 }
 
 async function pull(id) {
-  console.log('pulling', id);
+  window.pullCallback && window.pullCallback();
   const node = await get(id);
 
   const children = [];

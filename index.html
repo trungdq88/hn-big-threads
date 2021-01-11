@@ -65,6 +65,8 @@
 
     <script src="code.js"></script>
     <script type="text/javascript">
+    let pullCount = 0
+
     var flameGraph = d3.flameGraph()
       .width(960)
       .cellHeight(18)
@@ -133,9 +135,9 @@
       loadThread(threadid.value)
     }
 
-
     async function loadThread(id) {
-      text.innerHTML = "Loading... <br/> Pulling comments (via HN API) from your browser... long threads may take a long long time! (check Network tab in dev tool). Check /code-server.js to see how to pull comments from server-side"
+      pullCount = 0
+      text.innerHTML = "Loading... <span id=\"pull-status\"></span> <br/> <br/> Pulling comments (via HN API) from your browser... <br/>Long threads may take a long long time! (check Network tab in dev tool).<br/> Check /code-server.js to see how to pull comments from server-side"
       const data = await start(id);
       console.log(data)
       d3.select("#chart")
@@ -147,9 +149,21 @@
       text.innerText = "click an item in the graph to view comment"
       pullother.style.display = 'block';
     }
+
+    window.pullCallback = () => {
+      pullCount++;
+      const status = document.getElementById('pull-status');
+      status && (status.innerText = pullCount);
+    };
     </script>
 
-        <hr/>
+    <div style="display: flex; justify-content: space-between">
+      <p><span>Bookmark: <a href="javascript:location.href='https://trungdq88.github.io/hn-big-threads/#' + location.href.split('item?id=')[1]">Flame It!</a> ⬅ drag this to your bookmark bar, then click it while in a HN post.</span></p>
+
+      <p><span><a href="https://github.com/trungdq88/hn-big-threads">GitHub</a></span></p>
+    </div>
+
+    <hr/>
     <small>I also built a macOS app for devs, check it out 😊 <a href="https://devutils.app">https://devutils.app</a></small>
   </body>
 </html>
