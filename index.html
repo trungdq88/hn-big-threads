@@ -126,13 +126,13 @@
 
         parents.reverse()
 
-      var immediateChilds = (d.data.children || [])
+      var immediateChildren = (d.data.children || [])
 
       function render(conversation, level = false) {
-        return conversation.map((_, i) => `<div class="comment ${level && i === conversation.length - 1 ? 'highlighted' : ''}" style="${level ? `padding-left: ${30 * i}px;` : ''}"><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b> - <i class="muted">${_.children ? _.children.length : 0} direct childs, ${_.value} total comments </i><br/>${_.text}</div>`).join('');
+        return conversation.map((_, i) => `<div class="comment ${level && i === conversation.length - 1 ? 'highlighted' : ''}" style="${level ? `padding-left: ${30 * i}px;` : ''}"><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b> - <i class="muted">${_.children ? _.children.length : 0} direct replies, ${_.value} total comments </i><br/>${_.text}</div>`).join('');
       }
 
-      text.innerHTML = render(parents, true) + `<br/><div class="comment" style="padding-left: ${parents.length * 30}px"><p><i class="muted">Direct childs:</i></p>` + render(immediateChilds) + '</div>';
+      text.innerHTML = render(parents, true) + `<br/><div class="comment" style="padding-left: ${parents.length * 30}px"><p><i class="muted">Direct replies:</i></p>` + render(immediateChildren) + '</div>';
 
       }
 
